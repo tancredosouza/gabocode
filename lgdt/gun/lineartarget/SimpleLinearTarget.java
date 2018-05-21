@@ -1,4 +1,4 @@
-package lgdt.gun.headon;
+package lgdt.gun.lineartarget;
 
 import robocode.AdvancedRobot;
 
@@ -9,8 +9,9 @@ import lgdt.gun.VirtualGun;
 import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
+import lgdt.util.Converter;
 
-public class HeadOnGun implements VirtualGun {
+public class SimpleLinearTarget implements VirtualGun {
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
 
 	public void addRobotInfo(RobotInfo robot) {
@@ -21,7 +22,9 @@ public class HeadOnGun implements VirtualGun {
 		targets.remove(robotName);
 	}
 
-	public VirtualBullet getBullet(RobotInfo robot) {
+	public VirtualBullet getBullet(RobotInfo robot) {return new VirtualBullet(new PT(0, 0), new PT(0, 0), 0);}
+
+	public VirtualBullet getBullet(RobotInfo robot, AdvancedRobot r) {
 		// choosing target
 		RobotInfo target = null;
 		double targetDistance = 1e9;
@@ -39,17 +42,26 @@ public class HeadOnGun implements VirtualGun {
 			return null;
 		}
 		// choosing firing angle
-		double power = 3;
-		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(power), robot.getTime());
+		double power = 2.2;
+		double bulletSpeed = (20 - 3 * power) * 2;
+		double lateralVelocity = target.getVelocity().length() *
+				Math.sin(target.getHeadingRadians() - Converter.convertRadian(robot.getPosition().angle()));
+		lateralVelocity = target.getPosition().subtract(robot.getPosition()).normalize().cross(target.getVelocity());
+		double offset = Math.asin(lateralVelocity / bulletSpeed);
+		r.out.println("lateral velocity is " + lateralVelocity + ", offset is " + offset);
+		if(robot.getTime() - target.getTime() > 10) {
+			power = 0.5;
+		}
+		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(power).rotate(offset), robot.getTime());
 	}
 
 	public void run(AdvancedRobot robot) {
-		VirtualBullet bullet = getBullet(new RobotInfo(robot));
+		VirtualBullet bullet = getBullet(new RobotInfo(robot), robot);
 		if(bullet != null) {
 			double deltaHeading = bullet.velocity.angle((new PT(0, 1)).rotate(-robot.getGunHeadingRadians()));
-			double eps = 1e-3;
+			double eps = 0.01;
 			robot.setTurnGunRightRadians(deltaHeading);
-			if(-eps < deltaHeading && deltaHeading < eps) {
+			if(bullet.velocity.length() > 0.8 && -eps < deltaHeading && deltaHeading < eps) {
 				robot.setFire(bullet.getFirepower());
 			}
 		}

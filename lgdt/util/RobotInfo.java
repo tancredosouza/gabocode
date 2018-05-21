@@ -8,10 +8,12 @@ import robocode.ScannedRobotEvent;
 import lgdt.util.PT;
 
 public class RobotInfo {
-	public PT position, velocity;
-	public String name;
-	public long time;
-	public boolean isEnemy;
+	private PT position, velocity;
+	private String name;
+	private long time;
+	private double energy;
+	private boolean isEnemy;
+	private double headingRadian;
 
 	public RobotInfo(AdvancedRobot robot, ScannedRobotEvent e, boolean isEnemy) {
 		name = e.getName();
@@ -22,6 +24,8 @@ public class RobotInfo {
 		position = new PT(robotX, robotY);
 		velocity = (new PT(0, e.getVelocity())).rotate(-e.getHeadingRadians());
 		this.isEnemy = isEnemy;
+		energy = e.getEnergy();
+		headingRadian = e.getHeadingRadians();
 	}
 
 	public RobotInfo(AdvancedRobot robot) {
@@ -30,9 +34,15 @@ public class RobotInfo {
 		position = new PT(robot.getX(), robot.getY());
 		velocity = (new PT(0, robot.getVelocity())).rotate(-robot.getHeadingRadians());
 		isEnemy = false;
+		energy = robot.getEnergy();
+		headingRadian = robot.getHeadingRadians();
 	}
 
-	public boolean isEnemy() {
-		return this.isEnemy;
-	}
+	public PT getPosition() { return position; }
+	public PT getVelocity() { return velocity; }
+	public String getName() { return name; }
+	public long getTime() { return time; }
+	public double getEnergy() { return energy; }
+	public double getHeadingRadians() { return headingRadian; }
+	public boolean isEnemy() { return this.isEnemy; }
 }

@@ -6,6 +6,7 @@ import robocode.util.Utils;
 import lgdt.util.PT;
 import lgdt.util.SubSystem;
 import lgdt.util.RobotInfo;
+import lgdt.movement.antigravity.ForceField;
 import lgdt.movement.antigravity.GravityPoint;
 
 import java.util.Hashtable;
@@ -17,9 +18,9 @@ public class AntiGravityMovement implements SubSystem {
 	static double MAX_CENTER_MASS = 1000, CENTER_CHANGE_FREQ = 5;
 	static double ENEMY_MASS = 10000;
 
-	Hashtable<String, GravityPoint> fields = new Hashtable<String, GravityPoint>();
+	Hashtable<String, ForceField> fields = new Hashtable<String, ForceField>();
 
-	public void put(String name, GravityPoint point) {
+	public void put(String name, ForceField point) {
 		fields.put(name, point);
 	}
 
@@ -28,7 +29,7 @@ public class AntiGravityMovement implements SubSystem {
 	}
 
 	public void addRobotInfo(RobotInfo robot) {
-		fields.put(robot.name, new GravityPoint(robot.position, ENEMY_MASS));
+		fields.put(robot.getName(), new GravityPoint(robot.getPosition(), ENEMY_MASS * robot.getEnergy() / 100));
 	}
 
 	public void onRobotDeath(String robotName) {
@@ -43,8 +44,8 @@ public class AntiGravityMovement implements SubSystem {
 			return;
 		}
 		double angle = dir.angle(new PT(0, 1)) - robot.getHeadingRadians();
-		double size = dir.length();
-		robot.out.format("move: dirX: %f dirY: %f len: %f%n", dir.x, dir.y, size);
+		//double size = dir.length();
+		//robot.out.format("move: dirX: %f dirY: %f len: %f%n", dir.x, dir.y, size);
 		if(Math.abs(angle) < Math.PI / 2) {
 			robot.setTurnRightRadians(Utils.normalRelativeAngle(angle));
 			robot.setAhead(Double.POSITIVE_INFINITY);
@@ -56,10 +57,10 @@ public class AntiGravityMovement implements SubSystem {
 
     public PT getForce(PT cur_position) {
         PT net_force = new PT(0, 0);
-        Enumeration<GravityPoint> points_e = fields.elements();  
+        Enumeration<ForceField> points_e = fields.elements();  
         while (points_e.hasMoreElements()) {
-            GravityPoint point = (GravityPoint) points_e.nextElement();
-            net_force = net_force.add(point.force(cur_position));
+            ForceField point = (ForceField) points_e.nextElement();
+            net_force = net_force.add(point.getForce(cur_position));
         }
         return net_force;
     }

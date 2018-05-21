@@ -61,4 +61,8 @@ public class PT {
     public double length() {
         return Math.sqrt(dot(this));
     }
+
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
 }
