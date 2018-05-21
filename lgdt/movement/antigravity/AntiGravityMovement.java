@@ -1,6 +1,7 @@
 package lgdt.movement.antigravity;
 
 import robocode.AdvancedRobot;
+import robocode.util.Utils;
 
 import lgdt.util.PT;
 import lgdt.util.SubSystem;
@@ -45,10 +46,10 @@ public class AntiGravityMovement implements SubSystem {
 		double size = dir.length();
 		robot.out.format("move: dirX: %f dirY: %f len: %f%n", dir.x, dir.y, size);
 		if(Math.abs(angle) < Math.PI / 2) {
-			robot.setTurnRightRadians(angle);
+			robot.setTurnRightRadians(Utils.normalRelativeAngle(angle));
 			robot.setAhead(Double.POSITIVE_INFINITY);
 		} else {
-			robot.setTurnRightRadians(angle - Math.PI / 2);
+			robot.setTurnRightRadians(Utils.normalRelativeAngle(angle + Math.PI));
 			robot.setAhead(Double.NEGATIVE_INFINITY);
 		}
 	}
