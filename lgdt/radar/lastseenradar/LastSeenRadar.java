@@ -45,7 +45,6 @@ public class LastSeenRadar implements SubSystem {
 				return;
 			}
 			double angle = target.getPosition().subtract(new PT(robot.getX(), robot.getY())).angle();
-			robot.out.println("to robot " + target.getName() + " needs " + angle);
 			angle = Utils.normalRelativeAngle(Math.PI / 2 - angle - robot.getRadarHeadingRadians());
 			robot.setTurnRadarRightRadians(angle * 20000000);
 			state = 1;
