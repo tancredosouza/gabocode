@@ -16,7 +16,7 @@ public class SimpleEnergyDropScanner {
 			isDrop = lastDrop.get(robot.getName()).longValue() <= robot.getTime() && drop > 0;
 			if(isDrop) {
 				drop = Math.min(drop, 3);
-				lastDrop.put(robot.getName(), new Long(robot.getTime() + (long)1 + (long)Math.ceil(drop / 5)));
+				lastDrop.put(robot.getName(), new Long(robot.getTime() + (long)(10 + drop / 2)));
 			}
 		} else {
 			lastDrop.put(robot.getName(), new Long(0));
