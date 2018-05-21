@@ -36,6 +36,10 @@ public class AntiGravityMovement implements SubSystem {
 		fields.remove(robotName);
 	}
 
+	public void init(AdvancedRobot robot) {
+		
+	}
+
 	public void run(AdvancedRobot robot) {
 		addWalls(robot);
 		addCenter(robot);

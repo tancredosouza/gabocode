@@ -10,10 +10,9 @@ import lgdt.util.RobotInfo;
 import lgdt.util.SubSystem;
 import lgdt.radar.lastseenradar.LastSeenRadar;
 import lgdt.movement.antigravity.AntiGravityMovement;
-import lgdt.gun.lineartarget.SimpleLinearTarget;
 import lgdt.gun.lineartarget.IterativeLinearTarget;
 
-public class LGDT1v2SL extends AdvancedRobot {
+public class LGDT1v2LL extends AdvancedRobot {
 	// Scan
 	SubSystem radar = new LastSeenRadar();
 
@@ -64,5 +63,7 @@ public class LGDT1v2SL extends AdvancedRobot {
 		setGunColor(Color.red);
 		setRadarColor(Color.red);
 		setScanColor(Color.red);
+		// init modules
+		gun.init(this);
 	}
 }

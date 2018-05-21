@@ -21,6 +21,10 @@ public class HeadOnGun implements VirtualGun {
 		targets.remove(robotName);
 	}
 
+	public void init(AdvancedRobot robot) {
+		
+	}
+
 	public VirtualBullet getBullet(RobotInfo robot) {
 		// choosing target
 		RobotInfo target = null;

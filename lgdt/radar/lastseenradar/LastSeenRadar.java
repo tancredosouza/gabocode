@@ -23,6 +23,10 @@ public class LastSeenRadar implements SubSystem {
 		lastSeen.remove(robotName);
 	}
 
+	public void init(AdvancedRobot robot) {
+		
+	}
+
 	public void run(AdvancedRobot robot) {
 		if(lastSeen.size() < robot.getOthers()) {
 			robot.setTurnRadarRightRadians(Double.POSITIVE_INFINITY);

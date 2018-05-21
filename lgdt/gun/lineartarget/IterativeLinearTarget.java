@@ -9,10 +9,15 @@ import lgdt.gun.VirtualGun;
 import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
-import lgdt.util.Converter;
 
-public class SimpleLinearTarget implements VirtualGun {
+public class IterativeLinearTarget implements VirtualGun {
+	private double battleFieldHeight, battleFieldWidth;
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
+
+	public void init(AdvancedRobot robot) {
+		battleFieldHeight = robot.getBattleFieldHeight();
+		battleFieldWidth = robot.getBattleFieldWidth();
+	}
 
 	public void addRobotInfo(RobotInfo robot) {
 		targets.put(robot.getName(), robot);
@@ -22,20 +27,20 @@ public class SimpleLinearTarget implements VirtualGun {
 		targets.remove(robotName);
 	}
 
-	public void init(AdvancedRobot robot) {
-		
-	}
-
 	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
-		double bulletSpeed = (20 - 3 * power) * 2;
-		double lateralVelocity = target.getVelocity().length() *
-				Math.sin(target.getHeadingRadians() - Converter.convertRadian(robot.getPosition().angle()));
-		lateralVelocity = target.getPosition().subtract(robot.getPosition()).normalize().cross(target.getVelocity());
-		double offset = Math.asin(lateralVelocity / bulletSpeed);
-		if(robot.getTime() - target.getTime() > 10) {
-			power = 0.5;
+		double bulletSpeed = (20 - 3 * power);
+		PT predictedPosition = new PT(target.getPosition().x, target.getPosition().y);
+		double deltaTime = 0;
+		while((++deltaTime) * bulletSpeed < robot.getPosition().distance(predictedPosition)) {
+			predictedPosition = predictedPosition.add(target.getVelocity());
+			if(predictedPosition.x < 18 || predictedPosition.x > battleFieldWidth - 18 || 
+			   predictedPosition.y < 18 || predictedPosition.y > battleFieldHeight - 18) {
+				predictedPosition = new PT(Math.min(Math.max(predictedPosition.x, 18), battleFieldWidth - 18), 
+										   Math.min(Math.max(predictedPosition.y, 18), battleFieldHeight - 18));
+				break;
+			}
 		}
-		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(power).rotate(offset), robot.getTime());
+		return new VirtualBullet(robot.getPosition(), predictedPosition.subtract(robot.getPosition()).normalize().scale(power), robot.getTime());
 	}
 
 	public VirtualBullet getBullet(RobotInfo robot) {

@@ -8,6 +8,7 @@ import lgdt.util.SubSystem;
 public class SimpleRadar implements SubSystem {
 	public void addRobotInfo(RobotInfo robot) {}
 	public void onRobotDeath(String robotName) {}
+	public void init(AdvancedRobot robot) {}
 	public void run(AdvancedRobot robot) {
 		robot.setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 	}
