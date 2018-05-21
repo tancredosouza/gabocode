@@ -76,6 +76,9 @@ public class IterativeLinearTarget implements VirtualGun {
 	}
 
 	public void run(AdvancedRobot robot) {
+		/*if(Math.abs(robot.getGunTurnRemaining()) > 1e-9) {
+			return;
+		}*/
 		VirtualBullet bullet = getBullet(new RobotInfo(robot));
 		if(bullet != null) {
 			double deltaHeading = bullet.velocity.angle((new PT(0, 1)).rotate(-robot.getGunHeadingRadians()));

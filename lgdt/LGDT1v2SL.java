@@ -11,7 +11,6 @@ import lgdt.util.SubSystem;
 import lgdt.radar.lastseenradar.LastSeenRadar;
 import lgdt.movement.antigravity.AntiGravityMovement;
 import lgdt.gun.lineartarget.SimpleLinearTarget;
-import lgdt.gun.lineartarget.IterativeLinearTarget;
 
 public class LGDT1v2SL extends AdvancedRobot {
 	// Scan
@@ -21,7 +20,7 @@ public class LGDT1v2SL extends AdvancedRobot {
 	SubSystem movement = new AntiGravityMovement();
 	
 	// Target
-	SubSystem gun = new IterativeLinearTarget();
+	SubSystem gun = new SimpleLinearTarget();
 
 	public void run() {
 		init();
