@@ -11,7 +11,7 @@ public class SimpleEnergyDropScanner {
 
 	public boolean addRobotInfo(RobotInfo robot) {
 		boolean isDrop = false;
-		if(targets.contains(robot.getName())) {
+		if(targets.containsKey(robot.getName())) {
 			isDrop = lastDrop.get(robot.getName()).longValue() <= robot.getTime() && robot.getEnergy() < targets.get(robot.getName()).getEnergy();
 			if(isDrop) {
 				lastDrop.put(robot.getName(), new Long(robot.getTime() + 5));
