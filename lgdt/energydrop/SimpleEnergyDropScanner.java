@@ -10,7 +10,7 @@ public class SimpleEnergyDropScanner {
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
 	private Hashtable<String, long> lastDrop = new Hashtable<String, long>();
 
-	public void addRobotInfo(RobotInfo robot) {
+	public boolean addRobotInfo(RobotInfo robot) {
 		boolean isDrop = false;
 		if(targets.contains(robot.getName())) {
 			isDrop = lastDrop.get(robot.getName()) <= robot.getTime() && robot.getEnergy() < targets.get(robot.getName()).getEnergy();
