@@ -35,7 +35,7 @@ public class SimpleLinearTarget implements VirtualGun {
 		if(robot.getTime() - target.getTime() > 10) {
 			power = 0.5;
 		}
-		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(power).rotate(offset), robot.getTime());
+		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(bulletSpeed).rotate(offset), robot.getTime());
 	}
 
 	public VirtualBullet getBullet(RobotInfo robot) {
