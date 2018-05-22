@@ -40,7 +40,7 @@ public class IterativeLinearTarget implements VirtualGun {
 				break;
 			}
 		}
-		return new VirtualBullet(robot.getPosition(), predictedPosition.subtract(robot.getPosition()).normalize().scale(power), robot.getTime());
+		return new VirtualBullet(robot.getPosition(), predictedPosition.subtract(robot.getPosition()).normalize().scale(bulletSpeed), robot.getTime());
 	}
 
 	public VirtualBullet getBullet(RobotInfo robot) {
