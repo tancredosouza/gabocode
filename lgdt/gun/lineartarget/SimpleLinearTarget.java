@@ -11,7 +11,7 @@ import lgdt.util.RobotInfo;
 import lgdt.util.PT;
 import lgdt.util.Converter;
 
-public class SimpleLinearTarget implements VirtualGun {
+public class SimpleLinearTarget extends VirtualGun {
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
 
 	public void addRobotInfo(RobotInfo robot) {
@@ -65,7 +65,7 @@ public class SimpleLinearTarget implements VirtualGun {
 		} else if(robot.getEnergy() > 20) {
 			power = 2.2;
 		} else {
-			return null;
+			power = 0.1;
 		}
 		return getBullet(robot, target, power);
 	}
@@ -73,10 +73,8 @@ public class SimpleLinearTarget implements VirtualGun {
 	public void run(AdvancedRobot robot) {
 		VirtualBullet bullet = getBullet(new RobotInfo(robot));
 		if(bullet != null) {
-			double deltaHeading = bullet.velocity.angle((new PT(0, 1)).rotate(-robot.getGunHeadingRadians()));
-			double eps = 0.01;
-			robot.setTurnGunRightRadians(deltaHeading);
-			if(bullet.velocity.length() > 0.8 && -eps < deltaHeading && deltaHeading < eps) {
+			boolean isAimed = super.aimGun(robot, bullet);
+			if(bullet.getFirepower() > 0.8 && isAimed) {
 				robot.setFire(bullet.getFirepower());
 			}
 		}

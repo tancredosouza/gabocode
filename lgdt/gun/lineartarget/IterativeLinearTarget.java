@@ -10,7 +10,7 @@ import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
 
-public class IterativeLinearTarget implements VirtualGun {
+public class IterativeLinearTarget extends VirtualGun {
 	private double battleFieldHeight, battleFieldWidth;
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
 
@@ -20,6 +20,16 @@ public class IterativeLinearTarget implements VirtualGun {
 	}
 
 	public void addRobotInfo(RobotInfo robot) {
+		RobotInfo oldRobot = robot;
+		if(targets.containsKey(robot.getName())) {
+			oldRobot = targets.get(robot.getName());
+		}
+		double ratio = 0.74;
+		long ticks = robot.getTime() - oldRobot.getTime();
+		while(ticks > 0) {
+			robot.setVelocity(robot.getVelocity().scale(1 - ratio).add(oldRobot.getVelocity().scale(ratio)));
+			ticks--;
+		}
 		targets.put(robot.getName(), robot);
 	}
 
@@ -70,7 +80,7 @@ public class IterativeLinearTarget implements VirtualGun {
 		} else if(robot.getEnergy() > 20) {
 			power = 2.2;
 		} else {
-			return null;
+			power = 0.1;
 		}
 		return getBullet(robot, target, power);
 	}
@@ -81,10 +91,9 @@ public class IterativeLinearTarget implements VirtualGun {
 		}*/
 		VirtualBullet bullet = getBullet(new RobotInfo(robot));
 		if(bullet != null) {
-			double deltaHeading = bullet.velocity.angle((new PT(0, 1)).rotate(-robot.getGunHeadingRadians()));
-			double eps = 0.01;
-			robot.setTurnGunRightRadians(deltaHeading);
-			if(bullet.velocity.length() > 0.8 && -eps < deltaHeading && deltaHeading < eps) {
+			boolean isAimed = super.aimGun(robot, bullet, 0.01);
+			robot.out.println(isAimed + " and firepower " + bullet.getFirepower());
+			if(bullet.getFirepower() > 0.8 && isAimed) {
 				robot.setFire(bullet.getFirepower());
 			}
 		}

@@ -10,7 +10,7 @@ import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
 
-public class HeadOnGun implements VirtualGun {
+public class HeadOnGun extends VirtualGun {
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
 
 	public void addRobotInfo(RobotInfo robot) {
@@ -54,10 +54,7 @@ public class HeadOnGun implements VirtualGun {
 	public void run(AdvancedRobot robot) {
 		VirtualBullet bullet = getBullet(new RobotInfo(robot));
 		if(bullet != null) {
-			double deltaHeading = bullet.velocity.angle((new PT(0, 1)).rotate(-robot.getGunHeadingRadians()));
-			double eps = 1e-3;
-			robot.setTurnGunRightRadians(deltaHeading);
-			if(-eps < deltaHeading && deltaHeading < eps) {
+			if(super.aimGun(robot, bullet)) {
 				robot.setFire(bullet.getFirepower());
 			}
 		}

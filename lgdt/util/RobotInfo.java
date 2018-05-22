@@ -45,4 +45,6 @@ public class RobotInfo {
 	public double getEnergy() { return energy; }
 	public double getHeadingRadians() { return headingRadian; }
 	public boolean isEnemy() { return this.isEnemy; }
+
+	public void setVelocity(PT velocity) { this.velocity = velocity; }
 }
