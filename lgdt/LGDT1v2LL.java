@@ -64,6 +64,8 @@ public class LGDT1v2LL extends AdvancedRobot {
 		setRadarColor(Color.red);
 		setScanColor(Color.red);
 		// init modules
+		radar.init(this);
+		movement.init(this);
 		gun.init(this);
 	}
 }

@@ -23,4 +23,8 @@ public class VirtualBullet {
 	public double getFiringangle() {
 		return velocity.angle();
 	}
+
+	public long getTime() {
+		return startTime;
+	}
 }

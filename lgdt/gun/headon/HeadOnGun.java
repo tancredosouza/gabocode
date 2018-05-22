@@ -25,6 +25,10 @@ public class HeadOnGun implements VirtualGun {
 		
 	}
 
+	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
+		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(20 - 3 * power), robot.getTime());
+	}
+
 	public VirtualBullet getBullet(RobotInfo robot) {
 		// choosing target
 		RobotInfo target = null;
@@ -44,7 +48,7 @@ public class HeadOnGun implements VirtualGun {
 		}
 		// choosing firing angle
 		double power = 3;
-		return new VirtualBullet(robot.getPosition(), target.getPosition().subtract(robot.getPosition()).normalize().scale(power), robot.getTime());
+		return getBullet(robot, target, power);
 	}
 
 	public void run(AdvancedRobot robot) {

@@ -8,17 +8,29 @@ import lgdt.util.SubSystem;
 import lgdt.util.RobotInfo;
 import lgdt.movement.antigravity.ForceField;
 import lgdt.movement.antigravity.GravityPoint;
+import lgdt.movement.antigravity.BulletField;
+import lgdt.energydrop.SimpleEnergyDropScanner;
+import lgdt.gun.headon.HeadOnGun;
+import lgdt.gun.VirtualGun;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Vector;
 
 public class AntiGravityMovement implements SubSystem {
-	static double WALL_MASS = 20000;
+	static double WALL_MASS = 5000;
 	static int WALL_DECAY_POWER = 3;
-	static double MAX_CENTER_MASS = 1000, CENTER_CHANGE_FREQ = 5;
-	static double ENEMY_MASS = 10000;
+	static double MAX_CENTER_MASS = 100, CENTER_CHANGE_FREQ = 5;
+	static double ENEMY_MASS = 100;
+	static double BULLET_MASS = 200;
 
+    PT velocity = new PT(0, 0);
 	Hashtable<String, ForceField> fields = new Hashtable<String, ForceField>();
+	SimpleEnergyDropScanner dropScanner = new SimpleEnergyDropScanner();
+	AdvancedRobot base = null;
+	VirtualGun gun = new HeadOnGun();
+	int bulletCount = 0;
+
 
 	public void put(String name, ForceField point) {
 		fields.put(name, point);
@@ -29,6 +41,10 @@ public class AntiGravityMovement implements SubSystem {
 	}
 
 	public void addRobotInfo(RobotInfo robot) {
+		if(dropScanner.addRobotInfo(robot) && base != null) {
+			base.out.println("Creating bullet number " + bulletCount);
+			fields.put("Bullet#" + (bulletCount++), new BulletField(gun.getBullet(robot, new RobotInfo(base), 2.7), BULLET_MASS));
+		}
 		fields.put(robot.getName(), new GravityPoint(robot.getPosition(), ENEMY_MASS * robot.getEnergy() / 100));
 	}
 
@@ -37,19 +53,20 @@ public class AntiGravityMovement implements SubSystem {
 	}
 
 	public void init(AdvancedRobot robot) {
-		
+		base = robot;
 	}
 
 	public void run(AdvancedRobot robot) {
 		addWalls(robot);
 		addCenter(robot);
-		PT dir = getForce(new  PT(robot.getX(), robot.getY()));
-		if(dir.x == 0 && dir.y == 0) {
+        PT F = getForce(new RobotInfo(robot));
+        velocity = velocity.add(F);
+        velocity = velocity.normalize();
+        velocity = F;
+		if(velocity.x == 0 && velocity.y == 0) {
 			return;
 		}
-		double angle = dir.angle(new PT(0, 1)) - robot.getHeadingRadians();
-		//double size = dir.length();
-		//robot.out.format("move: dirX: %f dirY: %f len: %f%n", dir.x, dir.y, size);
+		double angle = velocity.angle(new PT(0, 1)) - robot.getHeadingRadians();
 		if(Math.abs(angle) < Math.PI / 2) {
 			robot.setTurnRightRadians(Utils.normalRelativeAngle(angle));
 			robot.setAhead(Double.POSITIVE_INFINITY);
@@ -57,16 +74,31 @@ public class AntiGravityMovement implements SubSystem {
 			robot.setTurnRightRadians(Utils.normalRelativeAngle(angle + Math.PI));
 			robot.setAhead(Double.NEGATIVE_INFINITY);
 		}
+		cleanUp();
 	}
 
-    public PT getForce(PT cur_position) {
+    public PT getForce(RobotInfo robot) {
         PT net_force = new PT(0, 0);
-        Enumeration<ForceField> points_e = fields.elements();  
+        Enumeration<ForceField> points_e = fields.elements();
         while (points_e.hasMoreElements()) {
             ForceField point = (ForceField) points_e.nextElement();
-            net_force = net_force.add(point.getForce(cur_position));
+            net_force = net_force.add(point.getForce(robot));
         }
         return net_force;
+    }
+
+    private void cleanUp() {
+    	Vector<String> vec = new Vector<String>();
+    	Enumeration<String> it = fields.keys();
+    	while (it.hasMoreElements()) {
+    		String name = (String) it.nextElement();
+    		if(fields.get(name).canDestroy()) {
+    			vec.add(name);
+    		}
+    	}
+    	for(String str : vec) {
+    		fields.remove(str);
+    	}
     }
 
     private void addCenter(AdvancedRobot robot) {

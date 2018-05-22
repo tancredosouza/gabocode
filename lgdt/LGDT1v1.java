@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 
 import lgdt.util.PT;
+import lgdt.util.RobotInfo;
 import lgdt.movement.antigravity.*;
 
 public class LGDT1v1 extends AdvancedRobot {
@@ -18,7 +19,7 @@ public class LGDT1v1 extends AdvancedRobot {
 	AntiGravityMovement movement;
 	int tickCount;
 	final double WALL_MASS = 20000;
-	final int WALL_DECAY_POWER = 3;
+	final double WALL_DECAY_POWER = 3;
 	final double MAX_CENTER_MASS = 1000, CENTER_CHANGE_FREQ = 5;
 	final double ENEMY_MASS = 10000;
 
@@ -70,7 +71,7 @@ public class LGDT1v1 extends AdvancedRobot {
 	private void runMovement() {
 		addWalls();
 		addCenter();
-		PT dir = movement.getForce(new PT(getX(), getY()));
+		PT dir = movement.getForce(new RobotInfo(this));
 		if(dir.x == 0 && dir.y == 0) {
 			return;
 		}

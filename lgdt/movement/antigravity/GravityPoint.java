@@ -1,6 +1,7 @@
 package lgdt.movement.antigravity;
 
 import lgdt.util.PT;
+import lgdt.util.RobotInfo;
 import lgdt.movement.antigravity.ForceField;
 
 public class GravityPoint implements ForceField { 
@@ -8,7 +9,7 @@ public class GravityPoint implements ForceField {
     double mass;
     double decay_power;
 
-    public GravityPoint(PT position, double mass, int decay_power) {
+    public GravityPoint(PT position, double mass, double decay_power) {
         this.position = position;
         this.mass = mass;
         this.decay_power = decay_power;
@@ -20,8 +21,15 @@ public class GravityPoint implements ForceField {
         this.decay_power = 2;
     }
 
-    public PT getForce(PT p) {
-        double size = mass / Math.pow(position.distance(p), decay_power);
-        return p.subtract(position).normalize().scale(size);
+    public PT getForce(RobotInfo robot) {
+        double size = mass / Math.pow(position.distance(robot.getPosition()), decay_power);
+        if(mass < 0) {
+            size = Math.max(size, mass / 1e5);
+        }
+        return robot.getPosition().subtract(position).normalize().scale(size);
+    }
+
+    public boolean canDestroy() {
+        return false;
     }
 }
