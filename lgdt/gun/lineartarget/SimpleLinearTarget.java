@@ -27,11 +27,11 @@ public class SimpleLinearTarget implements VirtualGun {
 	}
 
 	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
-		double bulletSpeed = (20 - 3 * power) * 2;
+		double bulletSpeed = (20 - 3 * power);
 		double lateralVelocity = target.getVelocity().length() *
 				Math.sin(target.getHeadingRadians() - Converter.convertRadian(robot.getPosition().angle()));
 		lateralVelocity = target.getPosition().subtract(robot.getPosition()).normalize().cross(target.getVelocity());
-		double offset = Math.asin(lateralVelocity / bulletSpeed);
+		double offset = Math.asin(lateralVelocity / bulletSpeed * 1.3);
 		if(robot.getTime() - target.getTime() > 10) {
 			power = 0.5;
 		}
