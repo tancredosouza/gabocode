@@ -1,6 +1,7 @@
-package lgdt.gun.lineartarget;
+package lgdt.gun.circulartarget;
 
 import robocode.AdvancedRobot;
+import robocode.util.Utils;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -10,7 +11,24 @@ import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
 
-public class IterativeLinearTarget extends VirtualGun {
+public class IterativeCircularTarget extends VirtualGun {
+	static public void merge(RobotInfo robot, RobotInfo oldRobot) {
+		double ratio = 0.83;
+		long ticks = robot.getTime() - oldRobot.getTime();
+		double headingAngleRatio = oldRobot.getHeadingRadianSpeed();
+		if(ticks > 0) {
+			PT velocity = robot.getVelocity();
+			double averageAngleRatio = Utils.normalRelativeAngle(robot.getHeadingRadians() - oldRobot.getHeadingRadians()) / ticks;
+			robot.setVelocity(oldRobot.getVelocity());
+			while(ticks > 0) {
+				robot.setVelocity(velocity.scale(1 - ratio).add(robot.getVelocity().scale(ratio)));
+				headingAngleRatio = headingAngleRatio * ratio + averageAngleRatio * (1 - ratio);
+				ticks--;
+			}
+		}
+		robot.setHeadingRadianSpeed(headingAngleRatio);
+	}
+
 	private double battleFieldHeight, battleFieldWidth;
 	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
 
@@ -24,14 +42,7 @@ public class IterativeLinearTarget extends VirtualGun {
 		if(targets.containsKey(robot.getName())) {
 			oldRobot = targets.get(robot.getName());
 		}
-		double ratio = 0.83;
-		long ticks = robot.getTime() - oldRobot.getTime();
-		PT velocity = robot.getVelocity();
-		robot.setVelocity(oldRobot.getVelocity());
-		while(ticks > 0) {
-			robot.setVelocity(velocity.scale(1 - ratio).add(oldRobot.getVelocity().scale(ratio)));
-			ticks--;
-		}
+		merge(robot, oldRobot);
 		targets.put(robot.getName(), robot);
 	}
 
@@ -41,10 +52,17 @@ public class IterativeLinearTarget extends VirtualGun {
 
 	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
 		double bulletSpeed = (20 - 3 * power);
+		double radius = target.getSpeed() / target.getHeadingRadianSpeed();
 		PT predictedPosition = new PT(target.getPosition().x, target.getPosition().y);
 		double deltaTime = 0;
 		while((deltaTime++) * bulletSpeed < robot.getPosition().distance(predictedPosition)) {
-			predictedPosition = predictedPosition.add(target.getVelocity());
+			double tothead = deltaTime * target.getHeadingRadianSpeed();
+			if(radius > 3000) {
+				predictedPosition = target.getPosition().add(target.getVelocity().scale(deltaTime));
+			} else {
+				predictedPosition.y = target.getPosition().y + (Math.sin(target.getHeadingRadians() + tothead) - Math.sin(target.getHeadingRadians())) * radius;
+				predictedPosition.x = target.getPosition().x + (Math.cos(target.getHeadingRadians()) - Math.cos(target.getHeadingRadians() + tothead)) * radius;
+			}
 			if(predictedPosition.x < 18 || predictedPosition.x > battleFieldWidth - 18 || 
 			   predictedPosition.y < 18 || predictedPosition.y > battleFieldHeight - 18) {
 				predictedPosition = new PT(Math.min(Math.max(predictedPosition.x, 18), battleFieldWidth - 18), 

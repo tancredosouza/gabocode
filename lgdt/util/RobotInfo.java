@@ -9,11 +9,12 @@ import lgdt.util.PT;
 
 public class RobotInfo {
 	private PT position, velocity;
+	private double speed;
 	private String name;
 	private long time;
 	private double energy;
 	private boolean isEnemy;
-	private double headingRadian;
+	private double headingRadian, headingRadianSpeed;
 
 	public RobotInfo(AdvancedRobot robot, ScannedRobotEvent e, boolean isEnemy) {
 		name = e.getName();
@@ -26,6 +27,8 @@ public class RobotInfo {
 		this.isEnemy = isEnemy;
 		energy = e.getEnergy();
 		headingRadian = e.getHeadingRadians();
+		headingRadianSpeed = 0;
+		speed = e.getVelocity();
 	}
 
 	public RobotInfo(AdvancedRobot robot) {
@@ -36,15 +39,20 @@ public class RobotInfo {
 		isEnemy = false;
 		energy = robot.getEnergy();
 		headingRadian = robot.getHeadingRadians();
+		headingRadianSpeed = 0;
+		speed = robot.getVelocity();
 	}
 
 	public PT getPosition() { return position; }
 	public PT getVelocity() { return velocity; }
+	public double getSpeed() { return speed; }
 	public String getName() { return name; }
 	public long getTime() { return time; }
 	public double getEnergy() { return energy; }
 	public double getHeadingRadians() { return headingRadian; }
+	public double getHeadingRadianSpeed() { return headingRadianSpeed; }
 	public boolean isEnemy() { return this.isEnemy; }
 
 	public void setVelocity(PT velocity) { this.velocity = velocity; }
+	public void setHeadingRadianSpeed(double speed) { this.headingRadianSpeed = speed; }
 }

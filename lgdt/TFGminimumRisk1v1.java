@@ -11,6 +11,7 @@ import lgdt.util.SubSystem;
 import lgdt.radar.lastseenradar.LastSeenRadar;
 import lgdt.movement.minimumrisk.MinimumRiskTFG1v1;
 import lgdt.gun.lineartarget.IterativeLinearTarget;
+import lgdt.gun.circulartarget.IterativeCircularTarget;
 
 public class TFGminimumRisk1v1 extends AdvancedRobot {
 	// Scan
@@ -20,7 +21,7 @@ public class TFGminimumRisk1v1 extends AdvancedRobot {
 	MinimumRiskTFG1v1 movement = new MinimumRiskTFG1v1();
 	
 	// Target
-	SubSystem gun = new IterativeLinearTarget();
+	SubSystem gun = new IterativeCircularTarget();
 
 	public void run() {
 		init();
