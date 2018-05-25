@@ -1,6 +1,7 @@
 package lgdt.movement.antigravity;
 
 import robocode.AdvancedRobot;
+import robocode.RobotDeathEvent;
 import robocode.util.Utils;
 
 import lgdt.util.PT;
@@ -19,7 +20,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Random;
 
-public class AntiGravityMovement implements SubSystem {
+public class AntiGravityMovement extends SubSystem {
 	static double WALL_MASS = 500000;
 	static double WALL_DECAY_POWER = 3.2;
 	static double MAX_CENTER_MASS = 100, CENTER_CHANGE_FREQ = 30;
@@ -30,7 +31,7 @@ public class AntiGravityMovement implements SubSystem {
     PT velocity = new PT(0, 0);
 	Hashtable<String, ForceField> fields = new Hashtable<String, ForceField>();
 	SimpleEnergyDropScanner dropScanner = new SimpleEnergyDropScanner();
-	AdvancedRobot base = null;
+	AdvancedRobot robot = null;
 	VirtualGun gun = new HeadOnGun();
 	VirtualGun gun2 = new SimpleLinearTarget();
 	int bulletCount = 0;
@@ -46,23 +47,23 @@ public class AntiGravityMovement implements SubSystem {
 	}
 
 	public void addRobotInfo(RobotInfo robot) {
-		if(dropScanner.addRobotInfo(robot) && base != null) {
-			base.out.println("Creating bullet number " + bulletCount);
-			fields.put("Bullet#" + (bulletCount++), new BulletField(gun.getBullet(robot, new RobotInfo(base), 2.7), BULLET_MASS, 2.5));
-			fields.put("Bullet#" + (bulletCount++), new BulletField(gun2.getBullet(robot, new RobotInfo(base), 2.7), BULLET_MASS, 2.5));
+		if(dropScanner.addRobotInfo(robot) && this.robot != null) {
+			this.robot.out.println("Creating bullet number " + bulletCount);
+			fields.put("Bullet#" + (bulletCount++), new BulletField(gun.getBullet(robot, new RobotInfo(this.robot), 2.7), BULLET_MASS, 2.5));
+			fields.put("Bullet#" + (bulletCount++), new BulletField(gun2.getBullet(robot, new RobotInfo(this.robot), 2.7), BULLET_MASS, 2.5));
 		}
 		fields.put(robot.getName(), new GravityPoint(robot.getPosition(), ENEMY_MASS * (50 + robot.getEnergy()) / 150));
 	}
 
-	public void onRobotDeath(String robotName) {
-		fields.remove(robotName);
+	public void onRobotDeath(RobotDeathEvent e) {
+		fields.remove(e.getName());
 	}
 
 	public void init(AdvancedRobot robot) {
-		base = robot;
+		this.robot = robot;
 	}
 
-	public void run(AdvancedRobot robot) {
+	public void run() {
 		addWalls(robot);
 		addCenter(robot);
         PT F = getForce(new RobotInfo(robot));

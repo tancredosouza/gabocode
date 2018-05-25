@@ -5,11 +5,8 @@ import robocode.AdvancedRobot;
 import lgdt.util.RobotInfo;
 import lgdt.util.SubSystem;
 
-public class SimpleRadar implements SubSystem {
-	public void addRobotInfo(RobotInfo robot) {}
-	public void onRobotDeath(String robotName) {}
-	public void init(AdvancedRobot robot) {}
-	public void run(AdvancedRobot robot) {
-		robot.setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-	}
+public class SimpleRadar extends SubSystem {
+	AdvancedRobot robot = null;
+	public void init(AdvancedRobot robot) { this.robot = robot; }
+	public void run() { robot.setTurnRadarRightRadians(Double.POSITIVE_INFINITY); }
 }

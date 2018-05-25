@@ -6,6 +6,7 @@ import robocode.RobotDeathEvent;
 
 import java.awt.*;
 
+import lgdt.util.BattleField;
 import lgdt.util.RobotInfo;
 import lgdt.util.SubSystem;
 import lgdt.radar.lastseenradar.LastSeenRadar;
@@ -23,14 +24,17 @@ public class TFGminimumRisk1v1 extends AdvancedRobot {
 	// Target
 	SubSystem gun = new IterativeCircularTarget();
 
+	// BattleField
+	BattleField battleField = null;
+
 	public void run() {
 		init();
 		
 		// main loop
 		while(true) {
-			runScan();
-			runMovement();
-			runTarget();
+			radar.run();
+			movement.run();
+			gun.run();
 			execute();
 		}
 	}
@@ -43,23 +47,22 @@ public class TFGminimumRisk1v1 extends AdvancedRobot {
 
 	public void onScannedRobot(ScannedRobotEvent e) {
 		RobotInfo r = new RobotInfo(this, e, true);
-		radar.addRobotInfo(r);
-		gun.addRobotInfo(r);
-		movement.addRobotInfo(r);
+		battleField.addRobotInfo(r);
+		radar.onScannedRobot(e);
+		gun.onScannedRobot(e);
+		movement.onScannedRobot(e);
 	}
 
 	public void onRobotDeath(RobotDeathEvent e) {
-		radar.onRobotDeath(e.getName());
-		gun.onRobotDeath(e.getName());
-		movement.onRobotDeath(e.getName());
+		battleField.onRobotDeath(e);
+		radar.onRobotDeath(e);
+		gun.onRobotDeath(e);
+		movement.onRobotDeath(e);
 	}
-
-	private void runScan() { radar.run(this); }
-	private void runMovement() { movement.run(this); }
-	private void runTarget() { gun.run(this); }
 
 	// initialization
 	private void init() {
+		battleField = new BattleField(getBattleFieldWidth(), getBattleFieldHeight());
 		// independent movement
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -72,5 +75,8 @@ public class TFGminimumRisk1v1 extends AdvancedRobot {
 		radar.init(this);
 		movement.init(this);
 		gun.init(this);
+		radar.setBattleField(battleField);
+		movement.setBattleField(battleField);
+		gun.setBattleField(battleField);
 	}
 }

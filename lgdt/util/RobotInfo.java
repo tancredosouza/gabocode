@@ -2,6 +2,7 @@ package lgdt.util;
 
 import java.lang.Math;
 
+import robocode.util.Utils;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 
@@ -41,6 +42,24 @@ public class RobotInfo {
 		headingRadian = robot.getHeadingRadians();
 		headingRadianSpeed = 0;
 		speed = robot.getVelocity();
+	}
+
+	public void merge(RobotInfo robot) {
+		double ratio = 0.83;
+		long ticks = robot.getTime() - this.getTime();
+		if(ticks > 0) {
+			double averageAngleRatio = Utils.normalRelativeAngle(robot.getHeadingRadians() - this.getHeadingRadians()) / ticks;
+			while(ticks > 0) {
+				velocity = velocity.scale(1 - ratio).add(robot.getVelocity().scale(ratio));
+				headingRadianSpeed = headingRadianSpeed * ratio + averageAngleRatio * (1 - ratio);
+				ticks--;
+			}
+		}
+		speed = robot.speed;
+		time = robot.time;
+		energy = robot.energy;
+		headingRadian = robot.headingRadian;
+		position = robot.position;
 	}
 
 	public PT getPosition() { return position; }

@@ -10,45 +10,14 @@ import lgdt.gun.VirtualGun;
 import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
+import lgdt.util.BattleField;
 
 public class IterativeCircularTarget extends VirtualGun {
-	static public void merge(RobotInfo robot, RobotInfo oldRobot) {
-		double ratio = 0.83;
-		long ticks = robot.getTime() - oldRobot.getTime();
-		double headingAngleRatio = oldRobot.getHeadingRadianSpeed();
-		if(ticks > 0) {
-			PT velocity = robot.getVelocity();
-			double averageAngleRatio = Utils.normalRelativeAngle(robot.getHeadingRadians() - oldRobot.getHeadingRadians()) / ticks;
-			robot.setVelocity(oldRobot.getVelocity());
-			while(ticks > 0) {
-				robot.setVelocity(velocity.scale(1 - ratio).add(robot.getVelocity().scale(ratio)));
-				headingAngleRatio = headingAngleRatio * ratio + averageAngleRatio * (1 - ratio);
-				ticks--;
-			}
-		}
-		robot.setHeadingRadianSpeed(headingAngleRatio);
-	}
+	BattleField battleField = null;
+	AdvancedRobot robot = null;
 
-	private double battleFieldHeight, battleFieldWidth;
-	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
-
-	public void init(AdvancedRobot robot) {
-		battleFieldHeight = robot.getBattleFieldHeight();
-		battleFieldWidth = robot.getBattleFieldWidth();
-	}
-
-	public void addRobotInfo(RobotInfo robot) {
-		RobotInfo oldRobot = robot;
-		if(targets.containsKey(robot.getName())) {
-			oldRobot = targets.get(robot.getName());
-		}
-		merge(robot, oldRobot);
-		targets.put(robot.getName(), robot);
-	}
-
-	public void onRobotDeath(String robotName) {
-		targets.remove(robotName);
-	}
+	public void setBattleField(BattleField battleField) { this.battleField = battleField; }
+	public void init(AdvancedRobot robot) { this.robot = robot;	}
 
 	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
 		double bulletSpeed = (20 - 3 * power);
@@ -63,10 +32,9 @@ public class IterativeCircularTarget extends VirtualGun {
 				predictedPosition.y = target.getPosition().y + (Math.sin(target.getHeadingRadians() + tothead) - Math.sin(target.getHeadingRadians())) * radius;
 				predictedPosition.x = target.getPosition().x + (Math.cos(target.getHeadingRadians()) - Math.cos(target.getHeadingRadians() + tothead)) * radius;
 			}
-			if(predictedPosition.x < 18 || predictedPosition.x > battleFieldWidth - 18 || 
-			   predictedPosition.y < 18 || predictedPosition.y > battleFieldHeight - 18) {
-				predictedPosition = new PT(Math.min(Math.max(predictedPosition.x, 18), battleFieldWidth - 18), 
-										   Math.min(Math.max(predictedPosition.y, 18), battleFieldHeight - 18));
+			if(!battleField.contains(predictedPosition, 18)) {
+				predictedPosition = new PT(Math.min(Math.max(predictedPosition.x, 18), battleField.getBattleFieldWidth() - 18), 
+										   Math.min(Math.max(predictedPosition.y, 18), battleField.getBattleFieldHeight() - 18));
 				break;
 			}
 		}
@@ -77,7 +45,7 @@ public class IterativeCircularTarget extends VirtualGun {
 		// choosing target
 		RobotInfo target = null;
 		double targetDistance = 1e9;
-		Enumeration<RobotInfo> it = targets.elements();
+		Enumeration<RobotInfo> it = battleField.elements();
 		while(it.hasMoreElements()) {
 			RobotInfo nxt = (RobotInfo) it.nextElement();
 			if(nxt.isEnemy()) {
@@ -105,10 +73,7 @@ public class IterativeCircularTarget extends VirtualGun {
 		return getBullet(robot, target, power);
 	}
 
-	public void run(AdvancedRobot robot) {
-		/*if(Math.abs(robot.getGunTurnRemaining()) > 1e-9) {
-			return;
-		}*/
+	public void run() {
 		VirtualBullet bullet = getBullet(new RobotInfo(robot));
 		if(bullet != null) {
 			boolean isAimed = super.aimGun(robot, bullet, 0.01);

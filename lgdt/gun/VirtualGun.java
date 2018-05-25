@@ -7,7 +7,7 @@ import lgdt.util.RobotInfo;
 import lgdt.gun.VirtualBullet;
 import lgdt.util.SubSystem;
 
-public abstract class VirtualGun implements SubSystem {
+public abstract class VirtualGun extends SubSystem {
 	public abstract VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power);
 	public abstract VirtualBullet getBullet(RobotInfo robot);
 

@@ -12,9 +12,10 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.awt.*;
 
-public class MinimumRiskTFG1v1 implements MinimumRiskBase {
+public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 	static double scale = 1e3;
-	Hashtable<String, RobotInfo> robots = new Hashtable<String, RobotInfo>();
+	AdvancedRobot robot;
+	BattleField battleField = null;
 	PT targetPosition = new PT(0, 0);
 	Graphics2D graph = null;
 
@@ -22,22 +23,19 @@ public class MinimumRiskTFG1v1 implements MinimumRiskBase {
 		this.graph = graph;
 	}
 
-	public void addRobotInfo(RobotInfo robot) {
-		robots.put(robot.getName(), robot);
-	}
-
-	public void onRobotDeath(String robotName) {
-		robots.remove(robotName);
+	public void setBattleField(BattleField battleField) {
+		this.battleField = battleField;
 	}
 
 	public void init(AdvancedRobot robot) {
+		this.robot = robot;
 		targetPosition = new PT(robot.getX(), robot.getY());
 	}
 
-	public void run(AdvancedRobot robot) {
+	public void run() {
 		PT position = new PT(robot.getX(), robot.getY());
-		double curCost = getRisk(robot, targetPosition);
 		if(targetPosition.distance(position) < 20) {
+			double curCost = getRisk(targetPosition);
 			BattleField bf = new BattleField(robot.getBattleFieldWidth(), robot.getBattleFieldHeight());
 			PT nextPosition = targetPosition;
 			for(int i = 0; i < 200; i++) {
@@ -45,7 +43,7 @@ public class MinimumRiskTFG1v1 implements MinimumRiskBase {
 				double distance = 100 + 100 * Math.random();
 				PT testPosition = position.add(new PT(Math.cos(angle) * distance, Math.sin(angle) * distance));
 				if(bf.contains(testPosition, 30)) {
-					double cost = getRisk(robot, testPosition);
+					double cost = getRisk(testPosition);
 					if(graph != null) {
 						float seeCost = (float) (cost * scale);
 						if(seeCost > 1) {
@@ -54,7 +52,6 @@ public class MinimumRiskTFG1v1 implements MinimumRiskBase {
 							scale *= 1.001;
 						}
 						seeCost = 1 - Math.min(1, Math.max(seeCost, 0));
-						robot.out.println("painting with color " + seeCost + " ratio was " + (scale * cost));
 						graph.setColor(new Color(seeCost, seeCost, seeCost));
 						graph.fillRect((int)testPosition.x, (int)testPosition.y, 10, 10);
 					}
@@ -80,8 +77,8 @@ public class MinimumRiskTFG1v1 implements MinimumRiskBase {
 		graph = null;
 	}
 
-	public double getRisk(AdvancedRobot robot, PT position) {
-		Enumeration<RobotInfo> it = robots.elements();
+	public double getRisk(PT position) {
+		Enumeration<RobotInfo> it = battleField.elements();
 		double dist = targetPosition.distance(position);
 		dist = Math.max(dist, 0.00001);
 		double eval = 0.08 / Math.pow(dist, 2);

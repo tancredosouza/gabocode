@@ -6,61 +6,56 @@ import robocode.RobotDeathEvent;
 
 import java.awt.*;
 
+import lgdt.util.BattleField;
 import lgdt.util.RobotInfo;
+import lgdt.util.SubSystem;
+import lgdt.radar.simpleradar.SimpleRadar;
 import lgdt.movement.antigravity.AntiGravityMovement;
 import lgdt.gun.headon.HeadOnGun;
 
 public class LGDT1v2 extends AdvancedRobot {
+	// Scan
+	SubSystem radar = new SimpleRadar();
+
 	// Movement
-	AntiGravityMovement movement;
+	SubSystem movement = new AntiGravityMovement();
 	
 	// Target
-	HeadOnGun gun;
+	SubSystem gun = new HeadOnGun();
+
+	// BattleField
+	BattleField battleField = null;
 
 	public void run() {
 		init();
 		
 		// main loop
 		while(true) {
-			runScan();
-			runMovement();
-			runTarget();
+			radar.run();
+			movement.run();
+			gun.run();
 			execute();
 		}
 	}
 
 	// Events
-
 	public void onScannedRobot(ScannedRobotEvent e) {
 		RobotInfo r = new RobotInfo(this, e, true);
-		gun.addRobotInfo(r);
+		battleField.addRobotInfo(r);
+		radar.onScannedRobot(e);
+		gun.onScannedRobot(e);
 		movement.addRobotInfo(r);
 	}
 
 	public void onRobotDeath(RobotDeathEvent e) {
-		gun.onRobotDeath(e.getName());
-		movement.onRobotDeath(e.getName());
-	}
-
-	// Scan
-
-	private void runScan() {
-		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-	}
-
-	// Movement
-
-	private void runMovement() {
-		movement.run(this);
-	}
-
-	// Target
-	private void runTarget() {
-		gun.run(this);
+		radar.onRobotDeath(e);
+		gun.onRobotDeath(e);
+		movement.onRobotDeath(e);
 	}
 
 	// initialization
 	private void init() {
+		battleField = new BattleField(getBattleFieldWidth(), getBattleFieldHeight());
 		// independent movement
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -69,11 +64,12 @@ public class LGDT1v2 extends AdvancedRobot {
 		setGunColor(Color.red);
 		setRadarColor(Color.red);
 		setScanColor(Color.red);
-		// initializing components
-		// scan
-		// movement
-		movement = new AntiGravityMovement();
-		// target
-		gun = new HeadOnGun();
+		// init modules
+		radar.init(this);
+		movement.init(this);
+		gun.init(this);
+		radar.setBattleField(battleField);
+		movement.setBattleField(battleField);
+		gun.setBattleField(battleField);
 	}
 }

@@ -7,6 +7,6 @@ import lgdt.util.PT;
 
 import java.util.Enumeration;
 
-public interface MinimumRiskBase extends SubSystem {
-	public double getRisk(AdvancedRobot robot, PT position);
+public abstract class MinimumRiskBase extends SubSystem {
+	public abstract double getRisk(PT position);
 }

@@ -1,6 +1,7 @@
 package lgdt.gun.lineartarget;
 
 import robocode.AdvancedRobot;
+import robocode.util.Utils;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -9,22 +10,15 @@ import lgdt.gun.VirtualGun;
 import lgdt.gun.VirtualBullet;
 import lgdt.util.RobotInfo;
 import lgdt.util.PT;
+import lgdt.util.BattleField;
 import lgdt.util.Converter;
 
 public class SimpleLinearTarget extends VirtualGun {
-	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
+	BattleField battleField = null;
+	AdvancedRobot robot = null;
 
-	public void addRobotInfo(RobotInfo robot) {
-		targets.put(robot.getName(), robot);
-	}
-
-	public void onRobotDeath(String robotName) {
-		targets.remove(robotName);
-	}
-
-	public void init(AdvancedRobot robot) {
-		
-	}
+	public void setBattleField(BattleField battleField) { this.battleField = battleField; }
+	public void init(AdvancedRobot robot) { this.robot = robot;	}
 
 	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
 		double bulletSpeed = (20 - 3 * power);
@@ -42,7 +36,7 @@ public class SimpleLinearTarget extends VirtualGun {
 		// choosing target
 		RobotInfo target = null;
 		double targetDistance = 1e9;
-		Enumeration<RobotInfo> it = targets.elements();
+		Enumeration<RobotInfo> it = battleField.elements();
 		while(it.hasMoreElements()) {
 			RobotInfo nxt = (RobotInfo) it.nextElement();
 			if(nxt.isEnemy()) {
@@ -70,10 +64,11 @@ public class SimpleLinearTarget extends VirtualGun {
 		return getBullet(robot, target, power);
 	}
 
-	public void run(AdvancedRobot robot) {
+	public void run() {
 		VirtualBullet bullet = getBullet(new RobotInfo(robot));
 		if(bullet != null) {
-			boolean isAimed = super.aimGun(robot, bullet);
+			boolean isAimed = super.aimGun(robot, bullet, 0.01);
+			robot.out.println(isAimed + " and firepower " + bullet.getFirepower());
 			if(bullet.getFirepower() > 0.8 && isAimed) {
 				robot.setFire(bullet.getFirepower());
 			}
