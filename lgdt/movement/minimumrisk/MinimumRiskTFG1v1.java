@@ -1,6 +1,7 @@
 package lgdt.movement.minimumrisk;
 
 import robocode.AdvancedRobot;
+import robocode.HitRobotEvent;
 import robocode.util.Utils;
 
 import lgdt.util.RobotInfo;
@@ -32,6 +33,11 @@ public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 		targetPosition = new PT(robot.getX(), robot.getY());
 	}
 
+	public void onHitRobot(HitRobotEvent event) {
+		targetPosition = new PT(robot.getX(), robot.getY());
+		run();
+	}
+
 	public void run() {
 		PT position = new PT(robot.getX(), robot.getY());
 		if(targetPosition.distance(position) < 20) {
@@ -40,7 +46,7 @@ public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 			PT nextPosition = targetPosition;
 			for(int i = 0; i < 200; i++) {
 				double angle = 2 * Math.PI * Math.random();
-				double distance = 100 + 100 * Math.random();
+				double distance = 50 + 100 * Math.random();
 				PT testPosition = position.add(new PT(Math.cos(angle) * distance, Math.sin(angle) * distance));
 				if(bf.contains(testPosition, 30)) {
 					double cost = getRisk(testPosition);
@@ -87,12 +93,18 @@ public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 		double bestApproach = 0;
 		while(it.hasMoreElements()) {
 			RobotInfo en = (RobotInfo) it.nextElement();
-			dist = en.getPosition().distance(position);
-			dist = Math.max(dist, 0.00001);
-			minDist = Math.min(minDist, dist);
-			double projection = Math.cos(position.subtract(targetPosition).angle(en.getPosition().subtract(targetPosition)));
-			eval += Math.min(en.getEnergy() / myEnergy, 2) * (1 + Math.abs(projection)) / Math.pow(dist, 2);
-			bestApproach = Math.max(bestApproach, Math.min(myEnergy / (en.getEnergy() + 20), 2) * 0.0001 * Math.abs(projection) / Math.pow(dist, 0.8 + 0.3 * robot.getOthers()));
+			if(en.isEnemy()) {
+				dist = en.getPosition().distance(position);
+				dist = Math.max(dist, 0.00001);
+				minDist = Math.min(minDist, dist);
+				double projection = Math.cos(position.subtract(targetPosition).angle(en.getPosition().subtract(targetPosition)));
+				eval += Math.min(en.getEnergy() / myEnergy, 2) * (1 + Math.abs(projection)) / Math.pow(dist, 2);
+				bestApproach = Math.max(bestApproach, Math.min(myEnergy / (en.getEnergy() + 20), 2) * 0.0001 * Math.abs(projection) / Math.pow(dist, 0.8 + 0.3 * robot.getOthers()));
+			} else {
+				dist = en.getPosition().distance(position);
+				dist = Math.max(dist, 0.00001);
+				eval += 2 / Math.pow(dist, 2);
+			}
 		}
 		eval -= bestApproach;
 		double limit = 400;
@@ -100,7 +112,7 @@ public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 			eval += 2 / Math.pow(minDist, 2);
 		} else {
 			eval += -2 / Math.pow(minDist, 1.5);
-			eval *= Math.pow(limit / minDist, Math.min(3, robot.getOthers()));
+			eval *= Math.pow(limit / minDist, Math.min(4, robot.getOthers()));
 		}
 		return eval;
 	}
