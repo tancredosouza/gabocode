@@ -4,8 +4,8 @@ import robocode.ScannedRobotEvent;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.HashMap;
 
 import lgdt.util.BattleField;
 import lgdt.util.PT;
@@ -36,9 +36,9 @@ public class LastSeenRadar extends SubSystem {
 		} else if(state == 0) {
 			long last = robot.getTime() + 1;
 			RobotInfo target = null;
-			Enumeration<RobotInfo> it = battleField.elements();
-			while(it.hasMoreElements()) {
-				RobotInfo nxt = (RobotInfo) it.nextElement();
+			Iterator<RobotInfo> it = battleField.values();
+			while(it.hasNext()) {
+				RobotInfo nxt = (RobotInfo) it.next();
 				if(last > nxt.getTime()) {
 					target = nxt;
 					last = nxt.getTime();

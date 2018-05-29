@@ -3,8 +3,8 @@ package lgdt.gun.lineartarget;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import lgdt.gun.VirtualGun;
 import lgdt.gun.VirtualBullet;
@@ -36,9 +36,9 @@ public class SimpleLinearTarget extends VirtualGun {
 		// choosing target
 		RobotInfo target = null;
 		double targetDistance = 1e9;
-		Enumeration<RobotInfo> it = battleField.elements();
-		while(it.hasMoreElements()) {
-			RobotInfo nxt = (RobotInfo) it.nextElement();
+		Iterator<RobotInfo> it = battleField.values();
+		while(it.hasNext()) {
+			RobotInfo nxt = (RobotInfo) it.next();
 			if(nxt.isEnemy()) {
 				if(robot.getPosition().distance(nxt.getPosition()) < targetDistance) {
 					targetDistance = robot.getPosition().distance(nxt.getPosition());

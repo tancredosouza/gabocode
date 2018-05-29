@@ -9,8 +9,8 @@ import lgdt.util.BattleField;
 import lgdt.util.PT;
 import lgdt.movement.minimumrisk.MinimumRiskBase;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.HashMap;
 import java.awt.*;
 
 public class MinimumRiskTFG1v1 extends MinimumRiskBase {
@@ -84,15 +84,15 @@ public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 	}
 
 	public double getRisk(PT position) {
-		Enumeration<RobotInfo> it = battleField.elements();
+		Iterator<RobotInfo> it = battleField.values();
 		double dist = targetPosition.distance(position);
 		dist = Math.max(dist, 0.00001);
 		double eval = 0.08 / Math.pow(dist, 2);
 		double myEnergy = robot.getEnergy();
 		double minDist = 1e9;
 		double bestApproach = 0;
-		while(it.hasMoreElements()) {
-			RobotInfo en = (RobotInfo) it.nextElement();
+		while(it.hasNext()) {
+			RobotInfo en = (RobotInfo) it.next();
 			if(en.isEnemy()) {
 				dist = en.getPosition().distance(position);
 				dist = Math.max(dist, 0.00001);

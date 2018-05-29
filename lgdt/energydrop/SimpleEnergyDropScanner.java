@@ -3,11 +3,11 @@ package lgdt.energydrop;
 import lgdt.util.RobotInfo;
 
 import java.lang.Long;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class SimpleEnergyDropScanner {
-	private Hashtable<String, RobotInfo> targets = new Hashtable<String, RobotInfo>();
-	private Hashtable<String, Long> lastDrop = new Hashtable<String, Long>();
+	private HashMap<String, RobotInfo> targets = new HashMap<String, RobotInfo>();
+	private HashMap<String, Long> lastDrop = new HashMap<String, Long>();
 
 	public boolean addRobotInfo(RobotInfo robot) {
 		boolean isDrop = false;

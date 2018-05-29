@@ -1,20 +1,25 @@
 package lgdt.gun;
 
 import lgdt.util.PT;
+import lgdt.gun.VirtualBullet;
 
 public class VirtualBulletHitEvent {
-    boolean is_hit;
-    int id;
+    boolean isHit;
+    String targetName;
     double angle;
+    VirtualBullet bullet;
+    int id;
 
-    public VirtualBulletHitEvent(boolean is_hit, int id, int angle) {
-        this.is_hit = is_hit;
+    public VirtualBulletHitEvent(boolean isHit, int id, double angle, String targetName, VirtualBullet bullet) {
+        this.isHit = isHit;
         this.id = id;
         this.angle = angle;
+        this.targetName = targetName;
+        this.bullet = bullet;
     }
 
     public boolean isHit() {
-        return is_hit;
+        return isHit;
     }
 
     public double getRelativeAngle() {
@@ -23,5 +28,13 @@ public class VirtualBulletHitEvent {
 
     public int getId() {
         return id;
+    }
+
+    public VirtualBullet getBulllet() {
+        return bullet;
+    }
+
+    public String getTargetName() {
+        return targetName;
     }
 }

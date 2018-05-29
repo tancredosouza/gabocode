@@ -9,11 +9,13 @@ import robocode.HitByBulletEvent;
 
 import lgdt.util.RobotInfo;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
 
 public class BattleField {
-	private Hashtable<String, RobotInfo> table = new Hashtable<String, RobotInfo>();
+	private Map<String, RobotInfo> table = Collections.synchronizedMap(new HashMap<String, RobotInfo>());
 	private double battleFieldWidth, battleFieldHeight;
 
 	public BattleField(double battleFieldWidth, double battleFieldHeight) {
@@ -26,7 +28,7 @@ public class BattleField {
 			   border < position.y && position.y < battleFieldHeight - border;
 	}
 
-	public Enumeration<RobotInfo> elements() { return table.elements(); }
+	public Iterator<RobotInfo> values() { return table.values().iterator(); }
 
 	public RobotInfo get(String name) { return table.get(name); }
 

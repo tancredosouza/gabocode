@@ -15,8 +15,8 @@ import lgdt.gun.headon.HeadOnGun;
 import lgdt.gun.lineartarget.SimpleLinearTarget;
 import lgdt.gun.VirtualGun;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.Random;
 
@@ -29,7 +29,7 @@ public class AntiGravityMovement extends SubSystem {
 	static double FORCE_OUT_MASS = 1000, FORCE_OUT_FREQ = 50;
 
     PT velocity = new PT(0, 0);
-	Hashtable<String, ForceField> fields = new Hashtable<String, ForceField>();
+	HashMap<String, ForceField> fields = new HashMap<String, ForceField>();
 	SimpleEnergyDropScanner dropScanner = new SimpleEnergyDropScanner();
 	AdvancedRobot robot = null;
 	VirtualGun gun = new HeadOnGun();
@@ -87,9 +87,9 @@ public class AntiGravityMovement extends SubSystem {
 
     public PT getForce(RobotInfo robot) {
         PT net_force = new PT(0, 0);
-        Enumeration<ForceField> points_e = fields.elements();
-        while (points_e.hasMoreElements()) {
-            ForceField point = (ForceField) points_e.nextElement();
+        Iterator<ForceField> points_e = fields.values();
+        while (points_e.hasNext()) {
+            ForceField point = (ForceField) points_e.next();
             net_force = net_force.add(point.getForce(robot));
         }
         return net_force;
@@ -97,9 +97,9 @@ public class AntiGravityMovement extends SubSystem {
 
     private void cleanUp() {
     	Vector<String> vec = new Vector<String>();
-    	Enumeration<String> it = fields.keys();
-    	while (it.hasMoreElements()) {
-    		String name = (String) it.nextElement();
+    	Iterator<String> it = fields.keys();
+    	while (it.hasNext()) {
+    		String name = (String) it.next();
     		if(fields.get(name).canDestroy()) {
     			vec.add(name);
     		}
