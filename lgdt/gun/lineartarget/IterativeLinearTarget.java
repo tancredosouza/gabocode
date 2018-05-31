@@ -24,7 +24,7 @@ public class IterativeLinearTarget extends VirtualGun {
 		PT predictedPosition = new PT(target.getPosition().x, target.getPosition().y);
 		double deltaTime = 0;
 		while((deltaTime++) * bulletSpeed < robot.getPosition().distance(predictedPosition)) {
-			predictedPosition = predictedPosition.add(robot.getVelocity());
+			predictedPosition = predictedPosition.add(target.getVelocity());
 			if(!battleField.contains(predictedPosition, 18)) {
 				predictedPosition = new PT(Math.min(Math.max(predictedPosition.x, 18), battleField.getBattleFieldWidth() - 18), 
 										   Math.min(Math.max(predictedPosition.y, 18), battleField.getBattleFieldHeight() - 18));

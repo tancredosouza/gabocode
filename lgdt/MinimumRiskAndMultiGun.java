@@ -14,6 +14,7 @@ import lgdt.radar.lastseenradar.LastSeenRadar;
 import lgdt.movement.minimumrisk.MinimumRiskTFG1v1;
 import lgdt.gun.lineartarget.IterativeLinearTarget;
 import lgdt.gun.circulartarget.IterativeCircularTarget;
+import lgdt.gun.headon.HeadOnGun;
 import lgdt.gun.multigun.Multigun;
 
 public class MinimumRiskAndMultiGun extends TeamRobot {

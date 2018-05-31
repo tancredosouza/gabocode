@@ -150,25 +150,24 @@ public class Multigun extends SubSystem {
                 robot.setFire(bullet.getFirepower());
                 state = State.TARGET;
                 robot.out.println("fired");
+
+                RobotInfo iRobotInfo = new RobotInfo(robot);
+                int id = 0;
+                for (GunInfo gun : guns) {
+                    Iterator<RobotInfo> it = battleField.values();
+                    while(it.hasNext()) {
+                        RobotInfo nxt = (RobotInfo) it.next();
+                        if(nxt.isEnemy()) {
+                            double power = getBulletPower(nxt.getPosition().distance(iRobotInfo.getPosition()));
+                            bullet = gun.gun.getBullet(iRobotInfo, nxt, power);
+                            virtualBulletManager.addBullet(bullet, this, nxt.getName(), id, gun.bulletCollor);
+                        }
+                    }
+                    id++;
+                }
             }
         }
         // virtual
-        if (robot.getTime() % 5 == 0) {
-            RobotInfo iRobotInfo = new RobotInfo(robot);
-            int id = 0;
-            for (GunInfo gun : guns) {
-                Iterator<RobotInfo> it = battleField.values();
-                while(it.hasNext()) {
-                    RobotInfo nxt = (RobotInfo) it.next();
-                    if(nxt.isEnemy()) {
-                        double power = getBulletPower(nxt.getPosition().distance(iRobotInfo.getPosition()));
-                        VirtualBullet bullet = gun.gun.getBullet(iRobotInfo, nxt, power);
-                        virtualBulletManager.addBullet(bullet, this, nxt.getName(), id, gun.bulletCollor);
-                    }
-                }
-                id++;
-            }
-        }
         virtualBulletManager.run();
     }
     
@@ -211,9 +210,9 @@ public class Multigun extends SubSystem {
 		} else if(distance < 600) {
 			return 2.5;
 		} else if(robot.getEnergy() > 20) {
-			return 2.2;
+			return 1.5;
 		} else {
-			return 0.1;
+			return 1;
 		}
     }
 
@@ -221,7 +220,6 @@ public class Multigun extends SubSystem {
         RobotInfo iRobotInfo = new RobotInfo(robot);
         if (target == null) return null;
         double power = getBulletPower(target.getPosition().distance(iRobotInfo.getPosition()));
-        if (target == null) return null;
         VirtualBullet bullet = chosenGun.getBullet(iRobotInfo, target, power);
         boolean isAimed = chosenGun.aimGun(robot, bullet, 0.01);
         if (isAimed && robot.getGunHeat() == 0) {

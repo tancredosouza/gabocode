@@ -21,7 +21,7 @@ public class IterativeCircularTarget extends VirtualGun {
 
 	public VirtualBullet getBullet(RobotInfo robot, RobotInfo target, double power) {
 		double bulletSpeed = (20 - 3 * power);
-		double radius = target.getSpeed() / target.getHeadingRadianSpeed();
+		double radius = target.getSpeed() / Math.max(target.getHeadingRadianSpeed(), 1e-9);
 		PT predictedPosition = new PT(target.getPosition().x, target.getPosition().y);
 		double deltaTime = 0;
 		while((deltaTime++) * bulletSpeed < robot.getPosition().distance(predictedPosition)) {

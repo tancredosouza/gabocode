@@ -16,7 +16,10 @@ import robocode.DeathEvent;
 import lgdt.util.BattleField;
 import lgdt.util.RobotInfo;
 
+import java.awt.*;
+
 public abstract class SubSystem {
+	public void onPaint(Graphics2D graph) {}
 	public void addRobotInfo(RobotInfo robot) {}
 	public void onRobotDeath(RobotDeathEvent event) {}
 	public void onScannedRobot(ScannedRobotEvent event) {}
