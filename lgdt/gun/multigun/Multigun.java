@@ -36,6 +36,12 @@ public class Multigun extends SubSystem {
             }
 
             public void addValue(double value) {
+                /*double ratio = 0.3;
+                mean = mean * ratio + (1 - ratio) * value;
+                squareMean = squareMean * ratio + (1 - ratio) * value * value;*/
+                if(numberOfElements > 10) {
+                    numberOfElements = 5;
+                }
                 mean *= numberOfElements;
                 squareMean *= numberOfElements;
                 mean += value;
@@ -99,6 +105,8 @@ public class Multigun extends SubSystem {
 	AdvancedRobot robot = null;
     ArrayList<GunInfo> guns = new ArrayList<GunInfo>();
     State state = State.TARGET;
+    double offset;
+    public VirtualBullet shotBullet = null;
 
 	public void setBattleField(BattleField battleField) { 
         this.battleField = battleField;
@@ -114,10 +122,10 @@ public class Multigun extends SubSystem {
 
     public void init(AdvancedRobot robot) {
         this.robot = robot;
-        guns.add(new GunInfo(new IterativeCircularTarget(), Color.BLUE));
         guns.add(new GunInfo(new HeadOnGun(), Color.GREEN));
+        guns.add(new GunInfo(new IterativeCircularTarget(), Color.BLUE));
         guns.add(new GunInfo(new IterativeLinearTarget(), Color.RED));
-        guns.add(new GunInfo(new SimpleLinearTarget(), Color.PINK));
+        //guns.add(new GunInfo(new SimpleLinearTarget(), Color.PINK));
         for (GunInfo gun : guns) {
             gun.gun.init(robot);
         }
@@ -125,6 +133,7 @@ public class Multigun extends SubSystem {
     }
 
 	public void run() {
+        shotBullet = null;
 		if (state == State.TARGET) {
             targetName = findTarget(new RobotInfo(robot));
             if(targetName != null) {
@@ -140,13 +149,14 @@ public class Multigun extends SubSystem {
             } else {
                 state = State.TARGET;
             }
-        }else if (state == State.AIM) {
+        } else if (state == State.AIM) {
             RobotInfo target = battleField.get(targetName);
             if (target == null) {
                 state = State.TARGET;
             }
             VirtualBullet bullet = aimGun(target);
-            if (bullet != null) {
+            if (bullet != null && robot.getEnergy() > 0) {
+                shotBullet = bullet;
                 robot.setFire(bullet.getFirepower());
                 state = State.TARGET;
                 robot.out.println("fired");
@@ -183,8 +193,14 @@ public class Multigun extends SubSystem {
         while(it.hasNext()) {
             RobotInfo nxt = (RobotInfo) it.next();
             if(nxt.isEnemy()) {
-                if(robot.getPosition().distance(nxt.getPosition()) < targetDistance) {
-                    targetDistance = robot.getPosition().distance(nxt.getPosition());
+                double var = 1e9;
+                for(GunInfo gun : guns) {
+                    var = Math.min(var, Math.abs(gun.getMeanError(nxt.getName())));
+                }
+                //this.robot.out.println(var);
+                var = robot.getPosition().distance(nxt.getPosition()) * (0.5 + var);
+                if(var < targetDistance) {
+                    targetDistance = var;
                     targetName = nxt.getName();
                 }
             }
@@ -193,12 +209,15 @@ public class Multigun extends SubSystem {
     }
 
     VirtualGun chooseGun() {
-        double minError = 1e9;
+        double minVar = 1e9;
         VirtualGun chosenGun = null;
         for (GunInfo gun : guns) {
-            if (gun.getMeanError(targetName) < minError) {
+            double var = gun.getVarianceError(targetName);
+            double error = gun.getMeanError(targetName);
+            if (Math.abs(error) < minVar) {
                 chosenGun = gun.gun;
-                minError = gun.getMeanError(targetName);
+                minVar = Math.abs(error);
+                offset = error;
             }
         }
         return chosenGun;
@@ -212,7 +231,7 @@ public class Multigun extends SubSystem {
 		} else if(robot.getEnergy() > 20) {
 			return 1.5;
 		} else {
-			return 1;
+			return 0.3;
 		}
     }
 
@@ -221,6 +240,7 @@ public class Multigun extends SubSystem {
         if (target == null) return null;
         double power = getBulletPower(target.getPosition().distance(iRobotInfo.getPosition()));
         VirtualBullet bullet = chosenGun.getBullet(iRobotInfo, target, power);
+        //bullet.velocity = bullet.velocity.rotate(offset);
         boolean isAimed = chosenGun.aimGun(robot, bullet, 0.01);
         if (isAimed && robot.getGunHeat() == 0) {
             return bullet;

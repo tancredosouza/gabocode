@@ -1,8 +1,8 @@
 package lgdt.util;
 
-import java.lang.Math;
+import java.io.Serializable;
 
-public class PT {
+public class PT implements Serializable {
     public double x, y;
 
     public PT(double x, double y) {

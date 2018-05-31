@@ -15,6 +15,7 @@ import robocode.DeathEvent;
 
 import lgdt.util.BattleField;
 import lgdt.util.RobotInfo;
+import lgdt.util.EnergyDropEvent;
 
 import java.awt.*;
 
@@ -32,6 +33,7 @@ public abstract class SubSystem {
 	public void onRoundEnded(RoundEndedEvent event) {}
 	public void onSkippedTurn(SkippedTurnEvent event) {}
 	public void onDeath(DeathEvent event) {}
+	public void onEnergyDrop(EnergyDropEvent event) {}
 	public void setBattleField(BattleField battleField) {}
 
 	public abstract void init(AdvancedRobot robot);

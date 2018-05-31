@@ -24,13 +24,15 @@ public class VirtualBulletManager extends SubSystem {
         public String targetName;
         public int id;
         public Color color;
+        public double weight;
 
-        public Info(VirtualBullet bullet, Multigun gun, String targetName, int id, Color color) {
+        public Info(VirtualBullet bullet, Multigun gun, String targetName, int id, Color color, double weight) {
             this.bullet = bullet;
             this.gun = gun;
             this.targetName = targetName;
             this.id = id;
             this.color = color;
+            this.weight = weight;
         }
     }
 
@@ -38,18 +40,26 @@ public class VirtualBulletManager extends SubSystem {
     ArrayList<Info> bullets = new ArrayList<Info>();
 	BattleField battleField = null;
     AdvancedRobot robot;
+    long curTime = 0;
 
 	public void onPaint(Graphics2D graph) {
+        curTime = robot.getTime();
         for (Info info : bullets) {
-            PT bullet_position = info.bullet.getPosition(robot.getTime());
-            graph.setColor(info.color);
-            Ellipse2D.Double circle = new Ellipse2D.Double((int)bullet_position.x, (int)bullet_position.y, 10, 10);
-            graph.fill(circle);
+            PT bullet_position = info.bullet.getPosition(curTime);
+            if(info.weight > 0.3) {
+                graph.setColor(info.color);
+                Ellipse2D.Double circle = new Ellipse2D.Double((int)bullet_position.x, (int)bullet_position.y, 10, 10);
+                graph.fill(circle);
+            }
         }
+    }
+
+    public void addBullet(VirtualBullet bullet, Multigun gun, String targetName, int id, Color color, double weight) {
+        bullets.add(new Info(bullet, gun, targetName, id, color, weight));
     }
     
     public void addBullet(VirtualBullet bullet, Multigun gun, String targetName, int id, Color color) {
-        bullets.add(new Info(bullet, gun, targetName, id, color));
+        addBullet(bullet, gun, targetName, id, color, 1.0);
     }
 
     public void setBattleField(BattleField battleField) {
@@ -60,10 +70,20 @@ public class VirtualBulletManager extends SubSystem {
         this.robot = robot;
     }
 
+    public double getDanger(PT position) {
+        double ans = 0;
+        for (Info info : bullets) {
+            ans += info.weight / Math.pow(info.bullet.getPosition(curTime).subtract(position).length(), 2) * (1 + Math.cos(info.bullet.velocity.angle(position.subtract(info.bullet.getPosition(curTime)))));
+        }
+        return ans;
+    }
+
 	public void run() {
+        curTime = robot.getTime();
+        RobotInfo myRobot = new RobotInfo(robot);
         for (int i = 0; i < bullets.size(); i++) {
             Info info = bullets.get(i);
-            RobotInfo target = battleField.get(info.targetName);
+            RobotInfo target = (info.targetName == null ? myRobot : battleField.get(info.targetName));
 
             boolean needToRemove = false;
             if (target == null) {
@@ -77,14 +97,18 @@ public class VirtualBulletManager extends SubSystem {
                 double angle = info.bullet.velocity.angle(target.getPosition().subtract(info.bullet.origin));
                 if (distance < EPS) { 
                     // hit target
-                    info.gun.onVirtualBulletHit(new VirtualBulletHitEvent(true, info.id, angle, info.targetName, info.bullet));
+                    if(info.gun != null) {
+                        info.gun.onVirtualBulletHit(new VirtualBulletHitEvent(true, info.id, angle, info.targetName, info.bullet));
+                    }
                     needToRemove = true;
                 } else if (bullet_position.x < 0 || bullet_position.y < 0
                             || bullet_position.x >= robot.getBattleFieldWidth()
                             || bullet_position.y >= robot.getBattleFieldHeight()
                             || cross_product > EPS) {
                     // missed
-                    info.gun.onVirtualBulletHit(new VirtualBulletHitEvent(false, info.id, angle, info.targetName, info.bullet));
+                    if(info.gun != null) {
+                        info.gun.onVirtualBulletHit(new VirtualBulletHitEvent(false, info.id, angle, info.targetName, info.bullet));
+                    }
                     needToRemove = true;
                 }
             }

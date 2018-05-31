@@ -2,7 +2,9 @@ package lgdt.gun;
 
 import lgdt.util.PT;
 
-public class VirtualBullet {
+import java.io.Serializable;
+
+public class VirtualBullet implements Serializable {
 	public PT origin, velocity;
 	private long startTime;
 

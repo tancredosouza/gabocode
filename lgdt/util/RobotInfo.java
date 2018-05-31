@@ -1,6 +1,6 @@
 package lgdt.util;
 
-import java.lang.Math;
+import java.io.Serializable;
 
 import robocode.util.Utils;
 import robocode.AdvancedRobot;
@@ -8,7 +8,7 @@ import robocode.ScannedRobotEvent;
 
 import lgdt.util.PT;
 
-public class RobotInfo {
+public class RobotInfo implements Serializable {
 	private PT position, velocity;
 	private double speed;
 	private String name;
