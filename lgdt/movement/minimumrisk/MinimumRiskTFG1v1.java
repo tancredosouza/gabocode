@@ -100,6 +100,7 @@ public class MinimumRiskTFG1v1 extends MinimumRiskBase {
 	public void run() {
 		others = robot.getOthers();
 		bulletManager.run();
+		confirmedManager.run();
 		PT position = new PT(robot.getX(), robot.getY());
 		//robot.out.println(Math.min(getRisk(position), getRisk(targetPosition)));
 		if(last == -1 || targetPosition.distance(position) < 10 || (Math.min(getRisk(position), getRisk(targetPosition)) > 0.001 && robot.getTime() - last >= 5)) {
